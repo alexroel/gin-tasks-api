@@ -1,0 +1,535 @@
+basePath: /api
+definitions:
+  domain.CreateTask:
+    properties:
+      title:
+        maxLength: 200
+        minLength: 1
+        type: string
+    required:
+    - title
+    type: object
+  domain.TaskResponse:
+    properties:
+      completed:
+        type: boolean
+      created_at:
+        type: integer
+      id:
+        type: integer
+      title:
+        type: string
+      updated_at:
+        type: integer
+      user_id:
+        type: integer
+    type: object
+  domain.UpdateTask:
+    properties:
+      completed:
+        type: boolean
+      title:
+        maxLength: 200
+        minLength: 1
+        type: string
+    type: object
+  domain.UserCreate:
+    properties:
+      email:
+        type: string
+      full_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 8
+        type: string
+    required:
+    - email
+    - full_name
+    - password
+    type: object
+  domain.UserLogin:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  domain.UserResponse:
+    properties:
+      created_at:
+        type: integer
+      email:
+        type: string
+      full_name:
+        type: string
+      id:
+        type: integer
+      updated_at:
+        type: integer
+    type: object
+  domain.UserUpdate:
+    properties:
+      email:
+        type: string
+      full_name:
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        minLength: 8
+        type: string
+    type: object
+  utils.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      success:
+        type: boolean
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: roel@roelcode.com
+    name: Alex Roel
+    url: http://www.alexroel.com
+  description: API para la gestión de tareas con autenticación de usuarios utilizando
+    JWT y Gin Framework.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: Tasks API
+  version: "1.0"
+paths:
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Autentica un usuario y retorna un token JWT
+      parameters:
+      - description: Credenciales del usuario
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserLogin'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Login exitoso
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  properties:
+                    token:
+                      type: string
+                    user:
+                      $ref: '#/definitions/domain.UserResponse'
+                  type: object
+              type: object
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: Credenciales incorrectas
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Iniciar sesión
+      tags:
+      - Auth
+  /auth/profile:
+    delete:
+      consumes:
+      - application/json
+      description: Elimina la cuenta del usuario autenticado
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Cuenta eliminada
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Error interno
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Eliminar cuenta
+      tags:
+      - Auth
+    get:
+      consumes:
+      - application/json
+      description: Obtiene la información del usuario autenticado
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Perfil obtenido
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserResponse'
+              type: object
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Usuario no encontrado
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Obtener perfil
+      tags:
+      - Auth
+    put:
+      consumes:
+      - application/json
+      description: Actualiza la información del usuario autenticado
+      parameters:
+      - description: Datos a actualizar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserUpdate'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Perfil actualizado
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserResponse'
+              type: object
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Actualizar perfil
+      tags:
+      - Auth
+  /auth/signup:
+    post:
+      consumes:
+      - application/json
+      description: Registra un nuevo usuario en el sistema
+      parameters:
+      - description: Datos de registro del usuario
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UserCreate'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Usuario registrado
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.UserResponse'
+              type: object
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/utils.Response'
+      summary: Registro de usuario
+      tags:
+      - Auth
+  /tasks:
+    get:
+      consumes:
+      - application/json
+      description: Obtiene todas las tareas del usuario autenticado
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Lista de tareas
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  items:
+                    $ref: '#/definitions/domain.TaskResponse'
+                  type: array
+              type: object
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Error interno
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Listar tareas
+      tags:
+      - Tasks
+    post:
+      consumes:
+      - application/json
+      description: Crea una nueva tarea para el usuario autenticado
+      parameters:
+      - description: Datos de la tarea
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.CreateTask'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Tarea creada
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.TaskResponse'
+              type: object
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "500":
+          description: Error interno
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Crear tarea
+      tags:
+      - Tasks
+  /tasks/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Elimina una tarea por su ID
+      parameters:
+      - description: ID de la tarea
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tarea eliminada
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Sin permiso
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Tarea no encontrada
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Eliminar tarea
+      tags:
+      - Tasks
+    get:
+      consumes:
+      - application/json
+      description: Obtiene una tarea por su ID
+      parameters:
+      - description: ID de la tarea
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tarea obtenida
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.TaskResponse'
+              type: object
+        "400":
+          description: ID inválido
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Sin permiso
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Tarea no encontrada
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Obtener tarea
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - application/json
+      description: Actualiza una tarea existente
+      parameters:
+      - description: ID de la tarea
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Datos a actualizar
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateTask'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Tarea actualizada
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.TaskResponse'
+              type: object
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Sin permiso
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Tarea no encontrada
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Actualizar tarea
+      tags:
+      - Tasks
+  /tasks/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Actualiza el estado de completado de una tarea
+      parameters:
+      - description: ID de la tarea
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Nuevo estado
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            completed:
+              type: boolean
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Estado actualizado
+          schema:
+            allOf:
+            - $ref: '#/definitions/utils.Response'
+            - properties:
+                data:
+                  $ref: '#/definitions/domain.TaskResponse'
+              type: object
+        "400":
+          description: Datos inválidos
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "401":
+          description: No autenticado
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "403":
+          description: Sin permiso
+          schema:
+            $ref: '#/definitions/utils.Response'
+        "404":
+          description: Tarea no encontrada
+          schema:
+            $ref: '#/definitions/utils.Response'
+      security:
+      - BearerAuth: []
+      summary: Cambiar estado de tarea
+      tags:
+      - Tasks
+securityDefinitions:
+  BearerAuth:
+    description: Tipo de token JWT con el prefijo 'Bearer '
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

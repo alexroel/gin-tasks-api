@@ -1,0 +1,164 @@
+# ====================
+# Go
+# ====================
+
+# Binarios compilados
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+dist/
+
+# Archivos de test binarios
+*.test
+
+# Archivos de cobertura
+*.out
+coverage.out
+coverage.html
+coverage/
+
+# Directorios de dependencias (si usas vendor)
+vendor/
+
+# ====================
+# IDE y Editores
+# ====================
+
+# VS Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains (GoLand, IntelliJ)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim
+*.swp
+*.swo
+*~
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+
+# ====================
+# Entorno y Configuración
+# ====================
+
+# Variables de entorno
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Configuración local
+*.local.yaml
+*.local.json
+config.local.*
+
+# ====================
+# Sistema Operativo
+# ====================
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# ====================
+# Logs y Temporales
+# ====================
+
+# Logs
+*.log
+logs/
+log/
+
+# Temporales
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Cache
+.cache/
+__debug_bin*
+
+# ====================
+# Go Específico
+# ====================
+
+# Directorio de módulos (se descarga automáticamente)
+# go.sum se debe incluir en el control de versiones
+
+# Air (hot-reload)
+tmp/
+
+# Delve debugger
+__debug_bin
+
+# ====================
+# Base de Datos
+# ====================
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Dumps de MySQL
+*.sql
+!migrations/*.sql
+
+# ====================
+# Documentación Generada
+# ====================
+
+# Swagger docs generados (opcional, algunos prefieren commitear)
+# docs/swagger.json
+# docs/swagger.yaml
+# docs/docs.go
+
+# ====================
+# Otros
+# ====================
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos de certificados locales
+*.pem
+*.key
+*.crt
+!*.example.pem
+
+# Directorio de uploads locales
+uploads/
+static/uploads/
+
+# Profiling
+*.prof
+*.pprof
+
