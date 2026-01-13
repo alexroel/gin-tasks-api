@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"errors"
 
 	"github.com/alexroel/gin-tasks-api/internal/config"
@@ -10,13 +11,13 @@ import (
 
 // UserRepository define las operaciones de base de datos para usuarios
 type UserRepository interface {
-	Create(user *domain.User) error
-	GetAll() ([]domain.User, error)
-	GetByID(id uint) (*domain.User, error)
-	GetByEmail(email string) (*domain.User, error)
-	Update(user *domain.User) error
-	Delete(id uint) error
-	ExistsByEmail(email string) (bool, error)
+	Create(ctx context.Context, user *domain.User) error
+	GetAll(ctx context.Context) ([]domain.User, error)
+	GetByID(ctx context.Context, id uint) (*domain.User, error)
+	GetByEmail(ctx context.Context, email string) (*domain.User, error)
+	Update(ctx context.Context, user *domain.User) error
+	Delete(ctx context.Context, id uint) error
+	ExistsByEmail(ctx context.Context, email string) (bool, error)
 }
 
 // userRepository implementa UserRepository
@@ -30,21 +31,21 @@ func NewUserRepository() UserRepository {
 }
 
 // Create crea un nuevo usuario en la base de datos
-func (r *userRepository) Create(user *domain.User) error {
-	return r.db.Create(user).Error
+func (r *userRepository) Create(ctx context.Context, user *domain.User) error {
+	return r.db.WithContext(ctx).Create(user).Error
 }
 
 // GetAll obtiene todos los usuarios
-func (r *userRepository) GetAll() ([]domain.User, error) {
+func (r *userRepository) GetAll(ctx context.Context) ([]domain.User, error) {
 	var users []domain.User
-	err := r.db.Find(&users).Error
+	err := r.db.WithContext(ctx).Find(&users).Error
 	return users, err
 }
 
 // GetByID obtiene un usuario por su ID
-func (r *userRepository) GetByID(id uint) (*domain.User, error) {
+func (r *userRepository) GetByID(ctx context.Context, id uint) (*domain.User, error) {
 	var user domain.User
-	err := r.db.First(&user, id).Error
+	err := r.db.WithContext(ctx).First(&user, id).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -52,9 +53,9 @@ func (r *userRepository) GetByID(id uint) (*domain.User, error) {
 }
 
 // GetByEmail obtiene un usuario por su email
-func (r *userRepository) GetByEmail(email string) (*domain.User, error) {
+func (r *userRepository) GetByEmail(ctx context.Context, email string) (*domain.User, error) {
 	var user domain.User
-	err := r.db.Where("email = ?", email).First(&user).Error
+	err := r.db.WithContext(ctx).Where("email = ?", email).First(&user).Error
 	if errors.Is(err, gorm.ErrRecordNotFound) {
 		return nil, nil
 	}
@@ -62,18 +63,18 @@ func (r *userRepository) GetByEmail(email string) (*domain.User, error) {
 }
 
 // Update actualiza un usuario existente
-func (r *userRepository) Update(user *domain.User) error {
-	return r.db.Save(user).Error
+func (r *userRepository) Update(ctx context.Context, user *domain.User) error {
+	return r.db.WithContext(ctx).Save(user).Error
 }
 
 // Delete elimina un usuario por su ID (soft delete)
-func (r *userRepository) Delete(id uint) error {
-	return r.db.Delete(&domain.User{}, id).Error
+func (r *userRepository) Delete(ctx context.Context, id uint) error {
+	return r.db.WithContext(ctx).Delete(&domain.User{}, id).Error
 }
 
 // ExistsByEmail verifica si existe un usuario con el email dado
-func (r *userRepository) ExistsByEmail(email string) (bool, error) {
+func (r *userRepository) ExistsByEmail(ctx context.Context, email string) (bool, error) {
 	var count int64
-	err := r.db.Model(&domain.User{}).Where("email = ?", email).Count(&count).Error
+	err := r.db.WithContext(ctx).Model(&domain.User{}).Where("email = ?", email).Count(&count).Error
 	return count > 0, err
 }

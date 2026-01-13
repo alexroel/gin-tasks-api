@@ -47,7 +47,7 @@ func (h *TaskHandler) Create(c *gin.Context) {
 		return
 	}
 
-	task, err := h.taskService.Create(userID, &req)
+	task, err := h.taskService.Create(c.Request.Context(), userID, &req)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Error al crear la tarea: "+err.Error())
 		return
@@ -75,7 +75,7 @@ func (h *TaskHandler) GetAll(c *gin.Context) {
 		return
 	}
 
-	tasks, err := h.taskService.GetByUserID(userID)
+	tasks, err := h.taskService.GetByUserID(c.Request.Context(), userID)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Error al obtener las tareas: "+err.Error())
 		return
@@ -119,7 +119,7 @@ func (h *TaskHandler) GetByID(c *gin.Context) {
 		return
 	}
 
-	task, err := h.taskService.GetByID(uint(taskID))
+	task, err := h.taskService.GetByID(c.Request.Context(), uint(taskID))
 	if err != nil {
 		if err == service.ErrTaskNotFound {
 			utils.ErrorResponse(c, http.StatusNotFound, "Tarea no encontrada")
@@ -174,7 +174,7 @@ func (h *TaskHandler) Update(c *gin.Context) {
 		return
 	}
 
-	task, err := h.taskService.Update(uint(taskID), userID, &req)
+	task, err := h.taskService.Update(c.Request.Context(), uint(taskID), userID, &req)
 	if err != nil {
 		switch err {
 		case service.ErrTaskNotFound:
@@ -219,7 +219,7 @@ func (h *TaskHandler) Delete(c *gin.Context) {
 		return
 	}
 
-	err = h.taskService.Delete(uint(taskID), userID)
+	err = h.taskService.Delete(c.Request.Context(), uint(taskID), userID)
 	if err != nil {
 		switch err {
 		case service.ErrTaskNotFound:
@@ -274,7 +274,7 @@ func (h *TaskHandler) ToggleStatus(c *gin.Context) {
 		return
 	}
 
-	task, err := h.taskService.UpdateStatus(uint(taskID), userID, req.Completed)
+	task, err := h.taskService.UpdateStatus(c.Request.Context(), uint(taskID), userID, req.Completed)
 	if err != nil {
 		switch err {
 		case service.ErrTaskNotFound:

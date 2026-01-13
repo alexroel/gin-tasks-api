@@ -38,7 +38,7 @@ func (h *AuthHandler) SignUpHandler(c *gin.Context) {
 	}
 
 	// Registrar usuario
-	user, err := h.authService.Register(&req)
+	user, err := h.authService.Register(c.Request.Context(), &req)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -76,7 +76,7 @@ func (h *AuthHandler) Login(c *gin.Context) {
 	}
 
 	// Autenticar usuario
-	token, user, err := h.authService.Login(&req)
+	token, user, err := h.authService.Login(c.Request.Context(), &req)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusUnauthorized, err.Error())
 		return
@@ -112,7 +112,7 @@ func (h *AuthHandler) Profile(c *gin.Context) {
 	}
 
 	// Obtener usuario
-	user, err := h.authService.GetUserByID(userID)
+	user, err := h.authService.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusNotFound, "Usuario no encontrado")
 		return
@@ -147,7 +147,7 @@ func (h *AuthHandler) UpdateProfile(c *gin.Context) {
 		return
 	}
 
-	user, err := h.authService.UpdateProfile(userID, &req)
+	user, err := h.authService.UpdateProfile(c.Request.Context(), userID, &req)
 	if err != nil {
 		utils.ErrorResponse(c, http.StatusBadRequest, err.Error())
 		return
@@ -175,7 +175,7 @@ func (h *AuthHandler) DeleteAccount(c *gin.Context) {
 		return
 	}
 
-	if err := h.authService.DeleteAccount(userID); err != nil {
+	if err := h.authService.DeleteAccount(c.Request.Context(), userID); err != nil {
 		utils.ErrorResponse(c, http.StatusInternalServerError, "Error al eliminar la cuenta: "+err.Error())
 		return
 	}

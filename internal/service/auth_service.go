@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/alexroel/gin-tasks-api/internal/config"
@@ -12,11 +13,11 @@ import (
 
 // AuthServiceInterface define las operaciones del servicio de autenticación
 type AuthServiceInterface interface {
-	Register(req *domain.UserCreate) (*domain.User, error)
-	Login(req *domain.UserLogin) (string, *domain.User, error)
-	GetUserByID(userID uint) (*domain.User, error)
-	UpdateProfile(userID uint, req *domain.UserUpdate) (*domain.User, error)
-	DeleteAccount(userID uint) error
+	Register(ctx context.Context, req *domain.UserCreate) (*domain.User, error)
+	Login(ctx context.Context, req *domain.UserLogin) (string, *domain.User, error)
+	GetUserByID(ctx context.Context, userID uint) (*domain.User, error)
+	UpdateProfile(ctx context.Context, userID uint, req *domain.UserUpdate) (*domain.User, error)
+	DeleteAccount(ctx context.Context, userID uint) error
 }
 
 type AuthService struct {
@@ -28,9 +29,9 @@ func NewAuthService(repo repository.UserRepository) *AuthService {
 }
 
 // Register registra un nuevo usuario
-func (s *AuthService) Register(req *domain.UserCreate) (*domain.User, error) {
+func (s *AuthService) Register(ctx context.Context, req *domain.UserCreate) (*domain.User, error) {
 	// Validar si el usuario ya existe
-	ok, err := s.repo.ExistsByEmail(req.Email)
+	ok, err := s.repo.ExistsByEmail(ctx, req.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -52,7 +53,7 @@ func (s *AuthService) Register(req *domain.UserCreate) (*domain.User, error) {
 	}
 
 	// Crear el usuario
-	err = s.repo.Create(user)
+	err = s.repo.Create(ctx, user)
 	if err != nil {
 		return nil, err
 	}
@@ -61,9 +62,9 @@ func (s *AuthService) Register(req *domain.UserCreate) (*domain.User, error) {
 }
 
 // Login autentica a un usuario
-func (s *AuthService) Login(req *domain.UserLogin) (string, *domain.User, error) {
+func (s *AuthService) Login(ctx context.Context, req *domain.UserLogin) (string, *domain.User, error) {
 	// Buscar el usuario por email
-	user, err := s.repo.GetByEmail(req.Email)
+	user, err := s.repo.GetByEmail(ctx, req.Email)
 	if err != nil || user == nil {
 		return "", nil, errors.New("Credenciales inválidas")
 	}
@@ -81,14 +82,14 @@ func (s *AuthService) Login(req *domain.UserLogin) (string, *domain.User, error)
 }
 
 // GetUserByID obtiene un usuario por su ID
-func (s *AuthService) GetUserByID(userID uint) (*domain.User, error) {
-	return s.repo.GetByID(userID)
+func (s *AuthService) GetUserByID(ctx context.Context, userID uint) (*domain.User, error) {
+	return s.repo.GetByID(ctx, userID)
 }
 
 // UpdateProfile actualiza el perfil del usuario autenticado
-func (s *AuthService) UpdateProfile(userID uint, req *domain.UserUpdate) (*domain.User, error) {
+func (s *AuthService) UpdateProfile(ctx context.Context, userID uint, req *domain.UserUpdate) (*domain.User, error) {
 	// Obtener usuario existente
-	user, err := s.repo.GetByID(userID)
+	user, err := s.repo.GetByID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +104,7 @@ func (s *AuthService) UpdateProfile(userID uint, req *domain.UserUpdate) (*domai
 
 	if req.Email != nil && *req.Email != user.Email {
 		// Verificar si el nuevo email ya existe
-		exists, err := s.repo.ExistsByEmail(*req.Email)
+		exists, err := s.repo.ExistsByEmail(ctx, *req.Email)
 		if err != nil {
 			return nil, err
 		}
@@ -121,7 +122,7 @@ func (s *AuthService) UpdateProfile(userID uint, req *domain.UserUpdate) (*domai
 		user.Password = hashedPassword
 	}
 
-	if err := s.repo.Update(user); err != nil {
+	if err := s.repo.Update(ctx, user); err != nil {
 		return nil, err
 	}
 
@@ -129,9 +130,9 @@ func (s *AuthService) UpdateProfile(userID uint, req *domain.UserUpdate) (*domai
 }
 
 // DeleteAccount elimina la cuenta del usuario autenticado
-func (s *AuthService) DeleteAccount(userID uint) error {
+func (s *AuthService) DeleteAccount(ctx context.Context, userID uint) error {
 	// Verificar que el usuario existe
-	user, err := s.repo.GetByID(userID)
+	user, err := s.repo.GetByID(ctx, userID)
 	if err != nil {
 		return err
 	}
@@ -139,5 +140,5 @@ func (s *AuthService) DeleteAccount(userID uint) error {
 		return errors.New("usuario no encontrado")
 	}
 
-	return s.repo.Delete(userID)
+	return s.repo.Delete(ctx, userID)
 }

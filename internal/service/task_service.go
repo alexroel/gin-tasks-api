@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"errors"
 
 	"github.com/alexroel/gin-tasks-api/internal/domain"
@@ -14,13 +15,13 @@ var (
 
 // TaskService define las operaciones de negocio para tareas
 type TaskService interface {
-	Create(userID uint, req *domain.CreateTask) (*domain.Task, error)
-	GetAll() ([]domain.Task, error)
-	GetByID(id uint) (*domain.Task, error)
-	GetByUserID(userID uint) ([]domain.Task, error)
-	Update(id, userID uint, req *domain.UpdateTask) (*domain.Task, error)
-	Delete(id, userID uint) error
-	UpdateStatus(id, userID uint, completed bool) (*domain.Task, error)
+	Create(ctx context.Context, userID uint, req *domain.CreateTask) (*domain.Task, error)
+	GetAll(ctx context.Context) ([]domain.Task, error)
+	GetByID(ctx context.Context, id uint) (*domain.Task, error)
+	GetByUserID(ctx context.Context, userID uint) ([]domain.Task, error)
+	Update(ctx context.Context, id, userID uint, req *domain.UpdateTask) (*domain.Task, error)
+	Delete(ctx context.Context, id, userID uint) error
+	UpdateStatus(ctx context.Context, id, userID uint, completed bool) (*domain.Task, error)
 }
 
 type taskService struct {
@@ -33,13 +34,13 @@ func NewTaskService(repo repository.TaskRepository) TaskService {
 }
 
 // Create crea una nueva tarea para un usuario
-func (s *taskService) Create(userID uint, req *domain.CreateTask) (*domain.Task, error) {
+func (s *taskService) Create(ctx context.Context, userID uint, req *domain.CreateTask) (*domain.Task, error) {
 	task := &domain.Task{
 		Title:  req.Title,
 		UserID: userID,
 	}
 
-	if err := s.repo.Create(task); err != nil {
+	if err := s.repo.Create(ctx, task); err != nil {
 		return nil, err
 	}
 
@@ -47,13 +48,13 @@ func (s *taskService) Create(userID uint, req *domain.CreateTask) (*domain.Task,
 }
 
 // GetAll obtiene todas las tareas
-func (s *taskService) GetAll() ([]domain.Task, error) {
-	return s.repo.GetAll()
+func (s *taskService) GetAll(ctx context.Context) ([]domain.Task, error) {
+	return s.repo.GetAll(ctx)
 }
 
 // GetByID obtiene una tarea por su ID
-func (s *taskService) GetByID(id uint) (*domain.Task, error) {
-	task, err := s.repo.GetByID(id)
+func (s *taskService) GetByID(ctx context.Context, id uint) (*domain.Task, error) {
+	task, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -64,14 +65,14 @@ func (s *taskService) GetByID(id uint) (*domain.Task, error) {
 }
 
 // GetByUserID obtiene todas las tareas de un usuario
-func (s *taskService) GetByUserID(userID uint) ([]domain.Task, error) {
-	return s.repo.GetByUserID(userID)
+func (s *taskService) GetByUserID(ctx context.Context, userID uint) ([]domain.Task, error) {
+	return s.repo.GetByUserID(ctx, userID)
 }
 
 // Update actualiza una tarea existente
-func (s *taskService) Update(id, userID uint, req *domain.UpdateTask) (*domain.Task, error) {
+func (s *taskService) Update(ctx context.Context, id, userID uint, req *domain.UpdateTask) (*domain.Task, error) {
 	// Obtener tarea existente
-	task, err := s.repo.GetByID(id)
+	task, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +93,7 @@ func (s *taskService) Update(id, userID uint, req *domain.UpdateTask) (*domain.T
 		task.Completed = *req.Completed
 	}
 
-	if err := s.repo.Update(task); err != nil {
+	if err := s.repo.Update(ctx, task); err != nil {
 		return nil, err
 	}
 
@@ -100,9 +101,9 @@ func (s *taskService) Update(id, userID uint, req *domain.UpdateTask) (*domain.T
 }
 
 // Delete elimina una tarea por su ID
-func (s *taskService) Delete(id, userID uint) error {
+func (s *taskService) Delete(ctx context.Context, id, userID uint) error {
 	// Obtener tarea existente
-	task, err := s.repo.GetByID(id)
+	task, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -115,13 +116,13 @@ func (s *taskService) Delete(id, userID uint) error {
 		return ErrTaskUnauthorized
 	}
 
-	return s.repo.Delete(id)
+	return s.repo.Delete(ctx, id)
 }
 
 // UpdateStatus actualiza el estado de completado de una tarea
-func (s *taskService) UpdateStatus(id, userID uint, completed bool) (*domain.Task, error) {
+func (s *taskService) UpdateStatus(ctx context.Context, id, userID uint, completed bool) (*domain.Task, error) {
 	// Obtener tarea existente
-	task, err := s.repo.GetByID(id)
+	task, err := s.repo.GetByID(ctx, id)
 	if err != nil {
 		return nil, err
 	}
@@ -135,7 +136,7 @@ func (s *taskService) UpdateStatus(id, userID uint, completed bool) (*domain.Tas
 	}
 
 	// Actualizar estado
-	if err := s.repo.UpdateStatus(id, completed); err != nil {
+	if err := s.repo.UpdateStatus(ctx, id, completed); err != nil {
 		return nil, err
 	}
 
