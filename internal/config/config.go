@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -39,10 +40,16 @@ func LoadConfig() error {
 		return errors.New("JWT_EXPIRE_IN tiene un formato inválido: " + jwtExpireStr)
 	}
 
+	// Obtener puerto y asegurar formato correcto
+	port := getEnv("PORT", "8080")
+	if !strings.HasPrefix(port, ":") {
+		port = ":" + port
+	}
+
 	AppConfig = &Config{
 		// Aplicación
 		GinMode: getEnv("GIN_MODE", "debug"),
-		Port:    getEnv("PORT", "8080"),
+		Port:    port,
 
 		// Base de datos
 		URLDatabase: getEnv("URL_DATABASE", ""),
