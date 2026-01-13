@@ -1,0 +1,23 @@
+# render.yaml - Configuración de despliegue en Render.com
+# Documentación: https://render.com/docs/blueprint-spec
+
+services:
+  # Web Service para la API
+  - type: web
+    name: gin-tasks-api
+    runtime: docker
+    region: oregon
+    plan: free
+    branch: main
+    healthCheckPath: /swagger/index.html
+    envVars:
+      - key: URL_DATABASE
+        sync: false  # Se configura manualmente en el dashboard
+      - key: JWT_SECRET
+        generateValue: true  # Render genera un valor seguro automáticamente
+      - key: JWT_EXPIRE_IN
+        value: 48h
+      - key: GIN_MODE
+        value: release
+      - key: PORT
+        value: 8080

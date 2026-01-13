@@ -16,11 +16,7 @@ type Config struct {
 	Port    string
 
 	// Base de datos
-	DBHost     string
-	DBPort     string
-	DBUser     string
-	DBPassword string
-	DBName     string
+	URLDatabase string
 
 	// JWT
 	JWTSecret   string
@@ -49,11 +45,7 @@ func LoadConfig() error {
 		Port:    getEnv("PORT", "8080"),
 
 		// Base de datos
-		DBHost:     getEnv("DB_HOST", "localhost"),
-		DBPort:     getEnv("DB_PORT", "3306"),
-		DBUser:     getEnv("DB_USER", "root"),
-		DBPassword: getEnv("DB_PASSWORD", ""),
-		DBName:     getEnv("DB_NAME", "tasks_db"),
+		URLDatabase: getEnv("URL_DATABASE", ""),
 
 		// JWT
 		JWTSecret:   getEnv("JWT_SECRET", ""),
@@ -77,8 +69,8 @@ func validateConfig() error {
 	if len(AppConfig.JWTSecret) < 10 {
 		return errors.New("JWT_SECRET debe tener al menos 10 caracteres")
 	}
-	if AppConfig.DBName == "" {
-		return errors.New("DB_NAME es requerido")
+	if AppConfig.URLDatabase == "" {
+		return errors.New("URL_DATABASE es requerido y no puede estar vacío")
 	}
 	return nil
 }

@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Documentación (NO excluir docs/ porque contiene código Swagger)
+*.md
+mydocs/
+
+# Archivos de entorno
+.env
+.env.*
+!.env.example
+
+# Tests
+*_test.go
+tests/
+coverage.out
+
+# Binarios
+*.exe
+main
+
+# Temporales
+tmp/
+*.log

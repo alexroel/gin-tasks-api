@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/alexroel/gin-tasks-api/internal/domain"
-	"gorm.io/driver/mysql"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
@@ -14,15 +14,9 @@ import (
 // DB es la instancia global de la base de datos que se utilizará en la aplicación
 var DB *gorm.DB
 
-// ConnectDB establece la conexión con la base de datos MySQL
+// ConnectDB establece la conexión con la base de datos PostgreSQL
 func ConnectDB() error {
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		AppConfig.DBUser,
-		AppConfig.DBPassword,
-		AppConfig.DBHost,
-		AppConfig.DBPort,
-		AppConfig.DBName,
-	)
+	dsn := AppConfig.URLDatabase
 
 	// Configurar logger de GORM según el modo
 	var gormLogger logger.Interface
@@ -32,7 +26,7 @@ func ConnectDB() error {
 		gormLogger = logger.Default.LogMode(logger.Silent)
 	}
 
-	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: gormLogger,
 	})
 	if err != nil {
@@ -45,9 +39,9 @@ func ConnectDB() error {
 		return fmt.Errorf("error al obtener instancia SQL: %w", err)
 	}
 
-	sqlDB.SetMaxIdleConns(10)              // Conexiones inactivas en el pool
-	sqlDB.SetMaxOpenConns(100)             // Máximo de conexiones abiertas
-	sqlDB.SetConnMaxLifetime(time.Hour)    // Tiempo máximo de vida de una conexión
+	sqlDB.SetMaxIdleConns(10)           // Conexiones inactivas en el pool
+	sqlDB.SetMaxOpenConns(100)          // Máximo de conexiones abiertas
+	sqlDB.SetConnMaxLifetime(time.Hour) // Tiempo máximo de vida de una conexión
 
 	DB = db
 	log.Println("Conexión a la base de datos exitosa")
