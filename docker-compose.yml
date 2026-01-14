@@ -1,18 +1,18 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: postgres:17-alpine
     container_name: postgres-tasks-db
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${PQSL_DB}
+      POSTGRES_USER: ${PQSL_USER}
+      POSTGRES_PASSWORD: ${PQSL_PASSWORD}
     ports:
-      - "5432:5432"
+      - "5433:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PQSL_USER} -d ${PQSL_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -27,7 +27,7 @@ services:
       postgres:
         condition: service_healthy
     environment:
-      URL_DATABASE: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+      URL_DATABASE: "postgresql://${PQSL_USER}:${PQSL_PASSWORD}@postgres:5432/${PQSL_DB}?sslmode=disable"
       JWT_SECRET: ${JWT_SECRET}
       GIN_MODE: ${GIN_MODE}
       PORT: ":8080"
